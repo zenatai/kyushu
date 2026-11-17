@@ -1,0 +1,4413 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="九州行">
+<title>JAZY 九州之旅</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#28241f;
+    --ink-soft:#6c6255;
+    --paper:#f2ede2;
+    --card:#fbf8f2;
+    --line:#dcd3bf;
+    --ai:#33503f;
+    --ai-soft:#6c8577;
+    --kaki:#b1502c;
+    --kaki-soft:#e9d3c4;
+    --kin:#9c7c34;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans TC', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--paper);
+    padding-bottom:48px;
+  }
+
+  /* header */
+  .app-head{
+    padding:22px 20px 20px;
+  }
+  .app-head h1{
+    font-family:'Noto Sans TC', sans-serif;
+    font-weight:400;
+    font-size:21px;
+    letter-spacing:.07em;
+    margin:0;
+    color:var(--ai);
+    display:inline-block;
+    transform:scaleX(0.92);
+    transform-origin:left top;
+  }
+
+  /* day tabs */
+  .day-tabs{
+    display:flex;
+    gap:9px;
+    padding:6px 20px 18px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .day-tabs::-webkit-scrollbar{display:none;}
+  .day-pill{
+    flex:0 0 auto;
+    width:52px;
+    height:62px;
+    border-radius:16px;
+    border:1px solid var(--line);
+    background:var(--card);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+  }
+  .day-pill .wd{
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .day-pill .dt{
+    font-family:'Noto Sans TC', sans-serif;
+    font-weight:700;
+    font-size:19px;
+    color:var(--ink);
+  }
+  .day-pill.active{
+    background:var(--ai);
+    border-color:var(--ai);
+  }
+  .day-pill.active .wd{color:#cdd9de;}
+  .day-pill.active .dt{color:#fff;}
+  .day-pill.empty{opacity:.4;}
+
+  /* day theme line */
+  .day-theme{
+    margin:0 20px 20px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+  }
+  .day-theme .caption{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+
+  /* timeline */
+  .timeline{
+    padding:4px 20px 8px;
+  }
+  .tl-row{
+    display:flex;
+    gap:12px;
+  }
+  .tl-time-col{
+    flex:0 0 54px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding-top:14px;
+  }
+  .tl-time{
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:16.2px;
+    font-weight:700;
+    color:var(--ai);
+    white-space:nowrap;
+    margin-bottom:8px;
+  }
+  .tl-line{
+    width:1.5px;
+    flex:1;
+    background:var(--line);
+  }
+  .tl-row:last-child .tl-line{display:none;}
+
+  .tl-body{
+    flex:1;
+    padding-bottom:22px;
+    min-width:0;
+  }
+
+  .node{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .node-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:13px 15px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .node-title{
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:17.5px;
+    font-weight:700;
+    line-height:1.4;
+  }
+  .tag{
+    display:inline-block;
+    font-size:12.2px;
+    color:var(--kaki);
+    background:var(--kaki-soft);
+    border-radius:20px;
+    padding:2px 9px;
+    margin-left:7px;
+    font-family:'Noto Sans TC', sans-serif;
+    vertical-align:1px;
+  }
+  .chevron{
+    flex:0 0 auto;
+    width:9px;
+    height:9px;
+    border-right:1.6px solid var(--ai-soft);
+    border-bottom:1.6px solid var(--ai-soft);
+    transform:rotate(45deg);
+    transition:transform .25s ease;
+    margin-right:2px;
+  }
+  .node.open > .node-head .chevron{
+    transform:rotate(-135deg);
+  }
+
+  .node-content{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .28s ease;
+  }
+  .node.open > .node-content{
+    /* max-height set inline via JS */
+  }
+
+  .content-pad{
+    padding:0 15px 15px;
+  }
+
+  .plain-detail{
+    font-size:16px;
+    line-height:1.7;
+    color:var(--ink);
+    padding-top:2px;
+  }
+  .detail-p{
+    margin:0 0 .55em;
+  }
+  .detail-p:last-child{
+    margin-bottom:0;
+  }
+  .detail-p a, .sub-detail a{
+    color:var(--ai);
+    text-decoration:underline;
+    word-break:break-all;
+  }
+
+  .subitem{
+    border-top:1px solid var(--line);
+    padding-top:11px;
+    margin-top:4px;
+  }
+  .subitem:first-child{
+    border-top:none;
+    padding-top:0;
+    margin-top:0;
+  }
+  .sub-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    cursor:pointer;
+    padding-bottom:11px;
+    user-select:none;
+  }
+  .sub-title{
+    font-size:16.4px;
+    font-weight:700;
+    color:var(--ai);
+  }
+  .sub-chevron{
+    flex:0 0 auto;
+    width:7px;
+    height:7px;
+    border-right:1.4px solid var(--ink-soft);
+    border-bottom:1.4px solid var(--ink-soft);
+    transform:rotate(45deg);
+    transition:transform .25s ease;
+  }
+  .subitem.open .sub-chevron{
+    transform:rotate(-135deg);
+  }
+  .sub-content{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .25s ease;
+  }
+  .sub-detail{
+    font-size:16px;
+    line-height:1.7;
+    color:var(--ink);
+    padding-bottom:13px;
+  }
+
+  .subline{
+    font-size:16.4px;
+    font-weight:700;
+    color:var(--ai);
+    border-top:1px solid var(--line);
+    margin-top:4px;
+    padding-top:11px;
+    padding-bottom:11px;
+  }
+  .subline:first-child{
+    border-top:none;
+    margin-top:0;
+    padding-top:0;
+  }
+
+  .detail-img{
+    display:block;
+    width:100%;
+    border-radius:12px;
+    margin-bottom:10px;
+    object-fit:cover;
+  }
+  .detail-gallery{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    margin-bottom:10px;
+  }
+  .detail-gallery .detail-img{
+    margin-bottom:0;
+    aspect-ratio:1/1;
+  }
+
+
+  .day-panel{
+    animation:fadeIn .2s ease;
+  }
+  @keyframes fadeIn{
+    from{opacity:0;}
+    to{opacity:1;}
+  }
+
+  .empty-note{
+    margin:30px 20px;
+    font-size:14px;
+    color:var(--ink-soft);
+    line-height:1.7;
+  }
+
+  /* ===== app header ===== */
+  .app-header{
+    padding:20px 20px 4px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .app-header h1{
+    font-family:'Noto Sans TC', sans-serif;
+    font-weight:700;
+    font-size:17.5px;
+    color:var(--ai);
+    margin:0;
+  }
+  .weather-badge{
+    flex:0 0 auto;
+    text-align:right;
+  }
+  .weather-badge .wb-city{
+    display:block;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-bottom:1px;
+  }
+  .weather-badge .wb-temp{
+    display:block;
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--ai);
+    white-space:nowrap;
+  }
+  .weather-badge .wb-temp .lo{
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+
+  /* ===== tab pages ===== */
+  .tab-page{
+    padding-bottom:76px;
+  }
+
+  /* ===== bottom nav ===== */
+  .bottom-nav{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    max-width:480px;
+    margin:0 auto;
+    display:flex;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+    z-index:50;
+  }
+  .bottom-nav button{
+    flex:1;
+    border:none;
+    background:none;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink-soft);
+    padding:12px 0 10px;
+    cursor:pointer;
+  }
+  .bottom-nav button.active{
+    color:var(--ai);
+    font-weight:700;
+  }
+
+  /* ===== guide tab ===== */
+  .guide-grid{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:51px 20px 20px;
+  }
+  .guide-cat-btn{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 18px;
+    text-align:left;
+    cursor:pointer;
+  }
+  .guide-cat-btn .gc-text{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    min-width:0;
+  }
+  .guide-cat-btn .gc-name{
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:17.5px;
+    font-weight:700;
+    color:var(--ink);
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+  .guide-cat-btn .gc-sub{
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:13px;
+    color:var(--ink-soft);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+  }
+  .guide-cat-btn .gc-chevron{
+    flex:0 0 auto;
+    width:8px;
+    height:8px;
+    border-right:1.6px solid var(--ai-soft);
+    border-bottom:1.6px solid var(--ai-soft);
+    transform:rotate(-45deg);
+  }
+  .guide-page{
+    display:none;
+    padding:0 20px 20px;
+  }
+  .guide-page.active{
+    display:block;
+  }
+  .guide-back{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:14px 0 10px;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ai);
+    cursor:pointer;
+    user-select:none;
+  }
+  .guide-back .back-chevron{
+    width:7px;
+    height:7px;
+    border-left:1.6px solid var(--ai);
+    border-bottom:1.6px solid var(--ai);
+    transform:rotate(45deg);
+  }
+  .guide-cat-title{
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:19px;
+    font-weight:700;
+    color:var(--ink);
+    margin:2px 0 12px;
+  }
+  .guide-flat{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:15px;
+  }
+  .guide-page .node{
+    margin-bottom:10px;
+  }
+  .guide-page .node:last-child{
+    margin-bottom:0;
+  }
+
+  .phrase-jp{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .jp-block{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+  }
+  .phrase-jp .jp-text{
+    font-size:16px;
+    color:var(--ink);
+  }
+  .phrase-jp .jp-romaji{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  .speak-btn{
+    flex:0 0 auto;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:none;
+    background:var(--ai);
+    color:#fff;
+    font-size:15px;
+    cursor:pointer;
+  }
+  .speak-btn:active{
+    background:var(--ai-soft);
+  }
+
+  /* ===== expense tab ===== */
+  .expense-subnav{
+    display:flex;
+    gap:8px;
+    padding:51px 20px 16px;
+  }
+  .expense-subnav button{
+    flex:1;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:20px;
+    padding:9px 0;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:14px;
+    font-weight:500;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .expense-subnav button.active{
+    background:var(--ai);
+    border-color:var(--ai);
+    color:#fff;
+    font-weight:700;
+  }
+  .expense-page{
+    display:none;
+    padding:0 20px;
+  }
+  .expense-page.active{
+    display:block;
+  }
+
+  .field-label{
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin:16px 0 8px;
+  }
+  .field-label:first-child{
+    margin-top:2px;
+  }
+
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .chip{
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:20px;
+    padding:8px 14px;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .chip.active{
+    background:var(--ai);
+    border-color:var(--ai);
+    color:#fff;
+    font-weight:700;
+  }
+
+  .amount-row{
+    display:flex;
+    gap:8px;
+    align-items:stretch;
+  }
+  .amount-input{
+    flex:1;
+    min-width:0;
+    width:100%;
+    box-sizing:border-box;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:12px;
+    padding:12px 14px;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:18px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .amount-input::-webkit-outer-spin-button,
+  .amount-input::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+  .amount-input:focus{
+    outline:2px solid var(--ai-soft);
+    outline-offset:1px;
+  }
+  .currency-toggle{
+    display:flex;
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    flex:0 0 auto;
+  }
+  .currency-toggle button{
+    border:none;
+    background:var(--card);
+    padding:0 12px;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .currency-toggle button.active{
+    background:var(--ai);
+    color:#fff;
+  }
+
+  .note-input{
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:12px;
+    padding:12px 14px;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    resize:none;
+  }
+
+  .add-btn{
+    width:100%;
+    margin-top:18px;
+    border:none;
+    background:var(--ai);
+    color:#fff;
+    border-radius:14px;
+    padding:14px 0;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  .entry-list{
+    margin-top:22px;
+  }
+  .entry-list-title{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .entry-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 0;
+    border-top:1px solid var(--line);
+  }
+  .entry-item:first-child{
+    border-top:none;
+  }
+  .entry-main{
+    flex:1;
+    min-width:0;
+  }
+  .entry-cat{
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .entry-note{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .entry-time{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .entry-amount{
+    font-size:15.5px;
+    font-weight:700;
+    color:var(--ai);
+    white-space:nowrap;
+  }
+  .entry-del{
+    flex:0 0 auto;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:none;
+    background:var(--kaki-soft);
+    color:var(--kaki);
+    font-size:14px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .empty-hint{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13.5px;
+    padding:30px 0;
+  }
+
+  .overview-grand{
+    background:var(--ai);
+    border-radius:16px;
+    padding:20px 18px;
+    text-align:center;
+    margin-top:6px;
+  }
+  .overview-grand .label{
+    font-size:13px;
+    color:#cddad0;
+    margin-bottom:4px;
+  }
+  .overview-grand .value{
+    font-size:30px;
+    font-weight:700;
+    color:#fff;
+  }
+  .overview-grand .hint{
+    font-size:11.5px;
+    color:#cddad0;
+    margin-top:6px;
+  }
+
+  .overview-totals{
+    display:flex;
+    gap:10px;
+    padding:6px 0 20px;
+  }
+  .overview-total-card{
+    flex:1;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 14px;
+    text-align:center;
+  }
+  .overview-total-card .label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .overview-total-card .value{
+    font-size:20px;
+    font-weight:700;
+    color:var(--ai);
+  }
+
+  .cat-breakdown{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:4px 15px;
+  }
+  .cat-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 0;
+    border-top:1px solid var(--line);
+  }
+  .cat-row:first-child{
+    border-top:none;
+  }
+  .cat-row .name{
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .cat-row .amounts{
+    font-size:14px;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+
+  .cat-block{
+    border-top:1px solid var(--line);
+  }
+  .cat-block:first-child{
+    border-top:none;
+  }
+  .cat-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:13px 0;
+    cursor:pointer;
+    user-select:none;
+  }
+  .cat-head .name{
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .cat-head-right{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .cat-head-right .amounts{
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .cat-chevron{
+    flex:0 0 auto;
+    width:7px;
+    height:7px;
+    border-right:1.6px solid var(--ai-soft);
+    border-bottom:1.6px solid var(--ai-soft);
+    transform:rotate(45deg);
+    transition:transform .25s ease;
+  }
+  .cat-block.open .cat-chevron{
+    transform:rotate(-135deg);
+  }
+  .cat-items{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .25s ease;
+  }
+  .cat-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:9px 0 9px 4px;
+    border-top:1px solid var(--line);
+  }
+  .cat-item:first-child{
+    border-top:none;
+  }
+  .ci-note{
+    font-size:13px;
+    color:var(--ink-soft);
+    min-width:0;
+    flex:1;
+  }
+  .ci-amount{
+    flex:0 0 auto;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+
+  .weather-list{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:2px 15px;
+    margin-top:10px;
+  }
+  .weather-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 0;
+    border-top:1px solid var(--line);
+  }
+  .weather-row:first-child{
+    border-top:none;
+  }
+  .wr-date{
+    flex:0 0 62px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .wr-wd{
+    font-weight:400;
+    color:var(--ink-soft);
+    margin-left:2px;
+  }
+  .wr-cond{
+    flex:1;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    min-width:0;
+  }
+  .wr-temp{
+    flex:0 0 auto;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ai);
+    white-space:nowrap;
+  }
+  .wr-lo{
+    font-weight:500;
+    color:var(--ink-soft);
+  }
+  .wr-rain{
+    flex:0 0 52px;
+    font-size:12.5px;
+    color:var(--ai-soft);
+    text-align:right;
+    white-space:nowrap;
+  }
+
+  /* ===== 九州版新增 ===== */
+  .tl-time.muted{ color:var(--ai-soft); }
+  .node.flat .node-head{ cursor:default; }
+  .guide-cat-sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:-8px 0 12px;
+  }
+  .sync-status{
+    font-size:12px;
+    color:var(--ink-soft);
+    padding:0 20px 12px;
+    margin-top:-6px;
+  }
+  .sync-status.warn{ color:var(--kaki); }
+  .date-input{
+    width:100%;
+    box-sizing:border-box;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:12px;
+    padding:11px 14px;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    -webkit-appearance:none;
+    appearance:none;
+    min-height:46px;
+  }
+  .amount-preview{
+    font-size:12.5px;
+    color:var(--ai-soft);
+    min-height:18px;
+    margin-top:6px;
+  }
+  .entry-day{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ai);
+    padding:14px 0 6px;
+    border-bottom:1px solid var(--line);
+  }
+  .entry-day + .entry-item{ border-top:none; }
+  .entry-amount-col{ flex:0 0 auto; text-align:right; }
+  .entry-twd{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; white-space:nowrap; }
+  .rate-note{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    padding:10px 0 0;
+    min-height:18px;
+  }
+  .overview-totals.tight{ padding-bottom:10px; }
+  .mode-row{
+    display:flex;
+    gap:8px;
+    padding:6px 0 12px;
+  }
+  .mode-row button{
+    flex:1;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:20px;
+    padding:7px 0;
+    font-family:'Noto Sans TC', sans-serif;
+    font-size:13px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .mode-row button.active{
+    background:var(--kaki-soft);
+    border-color:var(--kaki-soft);
+    color:var(--kaki);
+    font-weight:700;
+  }
+  .amounts-sub{ font-size:12px; margin-right:8px; }
+  .cat-head-right .amounts{ color:var(--ink); font-weight:700; }
+  .cat-head-right .amounts .amounts-sub{ color:var(--ink-soft); font-weight:400; }
+  .ci-twd{ display:block; font-size:11.5px; font-weight:400; color:var(--ink-soft); text-align:right; }
+  .ci-amount{ text-align:right; }
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:calc(74px + env(safe-area-inset-bottom, 0px));
+    transform:translateX(-50%) translateY(8px);
+    background:var(--ink);
+    color:#fff;
+    font-size:13.5px;
+    padding:10px 16px;
+    border-radius:20px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:60;
+    max-width:86%;
+    text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section class="tab-page" data-tabpage="itinerary">
+  <header class="app-header">
+    <h1>JAZY 九州之旅</h1>
+    <div class="weather-badge" data-weatherbadge>
+      <span class="wb-city" data-weathercity>－</span>
+      <span class="wb-temp"><span data-weatherhi>－°</span> / <span class="lo" data-weatherlo>－°</span></span>
+    </div>
+  </header>
+  <nav class="day-tabs">
+    <div class="day-pill active" data-day="17"><span class="wd">二</span><span class="dt">17</span></div>
+    <div class="day-pill" data-day="18"><span class="wd">三</span><span class="dt">18</span></div>
+    <div class="day-pill" data-day="19"><span class="wd">四</span><span class="dt">19</span></div>
+    <div class="day-pill" data-day="20"><span class="wd">五</span><span class="dt">20</span></div>
+    <div class="day-pill" data-day="21"><span class="wd">六</span><span class="dt">21</span></div>
+    <div class="day-pill" data-day="22"><span class="wd">日</span><span class="dt">22</span></div>
+    <div class="day-pill" data-day="23"><span class="wd">一</span><span class="dt">23</span></div>
+    <div class="day-pill" data-day="24"><span class="wd">二</span><span class="dt">24</span></div>
+    <div class="day-pill" data-day="25"><span class="wd">三</span><span class="dt">25</span></div>
+    <div class="day-pill" data-day="26"><span class="wd">四</span><span class="dt">26</span></div>
+    <div class="day-pill" data-day="27"><span class="wd">五</span><span class="dt">27</span></div>
+  </nav>
+
+  <section class="day-panel" data-panel="17">
+    <div class="day-theme">
+      <p class="caption">飛抵熊本，城下町的第一夜</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">15:55</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">台南機場起飛</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">15:55－19:00<br>TNN 台南 —— KMJ 阿蘇熊本</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">19:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">抵達阿蘇熊本機場</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">搭乘 機場利木津巴士</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">機場 —— 通町筋，車程約 40 分<br>站牌就在飯店門口</p><p class="detail-p">熊本的巴士不收 Suica 這類全國交通 IC 卡，上車請用信用卡感應或付現</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">Check In<br>OMO5 熊本 by 星野集團</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">入住 15:00；退房 11:00<br>えんたくルーム(雙床) 21.7㎡，3 泊<br>預約番號 OKMUKT263975</p><p class="detail-p">位在上通・下通拱廊商店街交會處，吃飯、藥妝、百貨、超商都在拱廊裡</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">20:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">晚餐</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">勝烈亭豬排<br>行程表原本寫「熊本車站用餐」，抵達後看時間與體力決定在哪一間吃</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="18" hidden>
+    <div class="day-theme">
+      <p class="caption">拱廊街裡慢慢走，熟悉這座城市的日常</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time muted">—</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">下通商店街</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">飯店樓下就是上通・下通拱廊，下雨也能全程有頂棚逛</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time muted">—</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node flat">
+          <div class="node-head">
+            <div class="node-title">鶴屋百貨</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time muted">—</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">熊本熊廣場</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">くまモンスクエア</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time muted">—</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">勝烈亭豬排</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">17 日晚上沒吃到的話，今天補上</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="19" hidden>
+    <div class="day-theme">
+      <p class="caption">留白的一天，跟著心情走</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time muted">—</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">自由安排</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">這天行程表還是空的</p><p class="detail-p">候補想法：熊本城與城彩苑、水前寺成趣園、上通巷弄的咖啡店與唱片行、超市採買(隔天帶進黑川，溫泉街晚上沒有超商)</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time muted">—</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">確認明天往阿蘇的車票<span class="tag">待確認</span></div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">11/20 熊本 → 阿蘇這一段目前沒有車票(09:57 那班已退票)<br>行程表上的班次是 08:25 → 09:54</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="20" hidden>
+    <div class="day-theme">
+      <p class="caption">火山、草原與玫瑰，傍晚泡進黑川的溪谷</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">08:25</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">熊本 → 阿蘇<span class="tag">車票待確認</span></div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">08:25 熊本駅 —— 09:54 阿蘇駅<br>OMO5 退房 11:00 前，帶兩個大行李上車</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">10:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">阿蘇駅 租車</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">行程表備註「租車時間 12:00 要改」，取車前確認預約時間已改成 10:00</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">10:20</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">草千里・阿蘇中岳火口</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">草千里ヶ浜 ＋ 阿蘇中岳火山口 ＋ 火山博物館<br>車程約 30 分</p><p class="detail-p">火口會依火山氣體濃度臨時管制，上山前看一下當天開放狀況</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">12:50</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">午餐</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">いまきん食堂<br>車程約 30 分</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">14:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">はな阿蘇美・ASO MILK FACTORY</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">はな阿蘇美 玫瑰園 ＋ ASO MILK FACTORY<br>兩處車程約 5 分</p><p class="detail-p">順路想去：阿蘇たかな漬本舗 菊屋</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">15:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">前往黑川溫泉</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subline">車程約 35 分</div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">Check In<br>inn NOSHIYU</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">入住 15:00－18:00；退房 10:00<br>203 Twin 24.2㎡，1 泊<br>預約 no. 8UAVTJE9／確認碼 2465939345</p><p class="detail-p">免費停車 4 台、不需預約<br>入住時跟櫃檯確認能不能延到 11:00 退房(日文句子在「實用日文」)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">16:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">逛溫泉街・買入湯手形</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">風之舍 18:00 關門，手形要在這之前買好</p><p class="detail-p">入夜後店家幾乎全部打烊，也沒有超商</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">18:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">回住宿泡湯・晚餐</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">貸切內湯 1 次 40 分，空著就能用<br>姊妹館「のし湯」露天風呂 15:00－22:00</p><p class="detail-p">晚餐：いろり家(時間再排)</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">20:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">手形泡湯・夜間散步</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">いこい旅館(08:30－20:30)，要在 20:30 前進場<br>路燈少，散步帶手機照明</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="21" hidden>
+    <div class="day-theme">
+      <p class="caption">大觀峰的遼闊，搭上阿蘇男孩往長崎</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">09:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">準備退房</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">溫泉街 09:30 左右開始營業</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">10:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">手形泡湯</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">こうの湯<br>備案：改去池山水源</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">11:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">大觀峰</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">車程約 30 分</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">12:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">午餐</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">山賊旅路<br>車程約 25 分</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">13:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">阿蘇神社・門前町商店街</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">車程約 10 分</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">15:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node flat">
+          <div class="node-head">
+            <div class="node-title">阿蘇駅 還車</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">15:56</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">搭乘 阿蘇男孩<span class="tag">已訂位</span></div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">あそぼーい！ 阿蘇 15:56 —— 熊本 17:08<br>4 號車 8 排 CD<br>預約番號 65518(只有特急券，乘車券另買)</p><p class="detail-p">熊本之後接新幹線、新鳥栖轉車往長崎<br>抵達長崎的時間，行程表上有 19:30 和 19:53 兩個寫法，以實際車票為準</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">19:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">抵達長崎駅</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">搭乘 路面電車</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">出站走到站前電停「長崎駅前」<br>搭 1 號系統，往「崇福寺」方向(不要搭往蛍茶屋的 3 號)</p><p class="detail-p">長崎駅前 → 五島町 → 大波止 → 出島 → 新地中華街 → 西浜町<br>約 13 分，第 5 站下車，走路約 2 分到飯店</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">Check In<br>Hotel H2 Nagasaki</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">入住 14:00－24:00；退房 11:00<br>Bunk Room 上下舖 12㎡，2 泊<br>預約番號 IY1656522779</p><p class="detail-p">房內沒有淋浴間，洗澡在 11F 大浴場<br>16:00－02:00／05:00－10:00</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">20:15</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">晚餐<span class="tag">已訂位</span></div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">桃源洞</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">籠町 8-33，從飯店走路約 10 分<br>營業 17:30－22:00<br>電話 095-823-6786</p><p class="detail-p">點餐時告知阿萱牛肉過敏</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">備案：列車誤點超過 20 分</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">先打電話告知晚到<br>改在「新地中華街」下車直接去桃源洞(走路約 7 分)，吃完再回 H2 入住</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="22" hidden>
+    <div class="day-theme">
+      <p class="caption">坡道、電車與祈念，山頂等一片夜景</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">07:40</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">出門買麵包</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">搭乘 路面電車</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">西浜町 → 五島町<br>1 號系統往赤迫，約 10 分</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">bread A espresso<span class="tag">06:30開門</span></div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">五島町電停旁(KTN 對面)<br>營業 06:30－14:00，早上常賣完所以提早去<br>多買一份當週一早餐</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">08:50</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">原爆資料館</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">搭乘 路面電車</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">08:25 五島町 → 原爆資料館<br>1 號系統往赤迫，約 13 分；下車走路約 5 分</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">原爆資料館</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">08:50－10:20<br>08:30 開館(11 月的時間是推估，出發前再確認)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">10:25</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">爆心地公園・平和公園</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">步行過去，麵包在公園吃</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">11:10</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">城山小學校平和祈念館</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">11:10－11:35<br>從平和公園電停走路約 10 分<br>09:30－16:30，免費</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">12:15</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">午餐<span class="tag">已訂位</span></div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">搭乘 路面電車</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">11:45 平和公園 → 新大工町<br>3 號系統往蛍茶屋，不用換車，約 25 分(估計)</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">むつ五郎</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">新大工町電停走路約 2 分<br>訂位 12:15，午餐最後點餐 13:45<br>電話 095-826-6560</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">13:25</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">松翁軒 買長崎蛋糕</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">魚の町 3-19，沿中島川步行<br>1 樓外帶 09:00－19:30</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">13:50</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">眼鏡橋一帶散步</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">ニューヨーク堂</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">14:00－14:20，從眼鏡橋走路約 5 分<br>11:00－16:00，不定休<br>去之前先打電話 095-822-4875</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">珈琲冨士男</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">14:35－15:00<br>鍛冶屋町 2-12，最後點餐 16:30，週四休</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">サニーボーイ・石丸文行堂</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">15:05－15:30，都在浜町<br>サニーボーイ 10:30－20:00(週四休)<br>石丸文行堂 10:30－19:00</p></div>
+                </div>
+              </div>
+              <div class="subline">時間不夠就依序刪：石丸文行堂 → サニーボーイ → 城山小</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">15:40</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">回 H2 放東西</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">短停 10 分鐘就出門</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">16:40</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">稻佐山夜景</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">前往纜車站</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">15:50 西浜町 → 長崎駅前(電車 1 號系統往赤迫，約 13 分)<br>16:10 長崎駅前 → ロープウェイ前(長崎巴士 3 或 4 號，約 7 分)<br>走路 2－3 分到淵神社駅</p><p class="detail-p">巴士班次還沒查到，現場看站牌</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">搭乘 長崎纜車</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">淵神社駅 → 稲佐岳駅，約 5 分<br>18:00 前每 20 分一班，之後每 15 分；營業到 22:00<br>假日可能排隊，已留約 25 分緩衝</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">日落與夜景</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">日落 17:16<br>約 17:45 天色轉暗，約 18:00 夜景最亮</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">下山</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">18:15－18:30 搭纜車下山<br>18:40 巴士 ロープウェイ前 → 長崎駅前<br>19:05 電車 長崎駅前 → 観光通(1 號系統往崇福寺，約 15 分)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">19:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">晚餐</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">炉端亜紗 喜三郎</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">銅座町 7-9，観光通電停走路約 2 分<br>17:00－24:00，不定休，分煙<br>電話 095-825-2000</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">其他候選</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">江山楼 長崎中華街新館<br>大阪屋<br>おでん 桃若(18:00－24:00，不定休，095-823-3392)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="23" hidden>
+    <div class="day-theme">
+      <p class="caption">南山手的洋館晨光，搭雙星 4047 沿海北上</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">08:15</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">退房・行李寄飯店</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">早餐吃週日買的麵包</p><p class="detail-p">今天是最趕的一天，緩衝只有約 25 分<br>時間不夠先刪水邊之森，再縮短哥拉巴園</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">08:35</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">長崎縣美術館・水邊之森</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">搭乘 路面電車</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">08:20 西浜町 → 新地中華街 → メディカルセンター<br>5 號系統往石橋，下車走路約 2 分</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">縣美術館外觀・水邊之森</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">08:35－09:10<br>出島町 2-1</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">09:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">荷蘭坂</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">09:15 メディカルセンター → 大浦天主堂(5 號系統往石橋)<br>下車後步行，位置到現場再用地圖確認</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">10:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">祈りの丘絵本美術館</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">祈りの丘絵本美術館</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">大浦天主堂電停走路約 3 分<br>10:00－17:30(11/23 假日有開)</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">南山手プリン 本店</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">10:30 左右<br>10:00－18:00</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">10:45</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">哥拉巴園</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">10:45－11:50<br>08:00－18:00，入園 ¥600</p><p class="detail-p">11:55 大浦天主堂，在外面看一眼</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">12:25</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">午餐</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">搭乘 路面電車</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">12:10 大浦天主堂 → 新地中華街<br>5 號系統往蛍茶屋，3 站</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">長崎和牛燒肉 ぴゅあ</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">新地町 2-7，電停走路約 2 分<br>11:00 開，最後點餐 14:00</p><p class="detail-p">點餐時先告知阿萱牛肉過敏</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">13:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">いろはや 出島本店</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">買紀念品，出島町 15-7<br>營業時間還沒查到</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">13:50</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">回 H2 取行李</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">14:00 西浜町 → 長崎駅前(1 號系統往赤迫，約 13 分)<br>14:25 進站找月台</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">14:53</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">搭乘 雙星 4047<span class="tag">已訂位</span></div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">ふたつ星4047 長崎 14:53 —— 武雄溫泉 17:54<br>3 號車 12 番 AD(吧台座)<br>預約番號 68244(只有特急券，乘車券另買)</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">18:15</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">武雄溫泉 → 博多</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">Relay Kamome 50 號<br>武雄溫泉 18:15 —— 博多 19:15</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">19:15</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">抵達博多</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">Check In<br>BOUNCEE by RIHGA 福岡博多</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">入住 15:00－24:00；退房 11:00(官網訂房可延到 12:00)<br>Standard Twin 18㎡，4 泊<br>預約 No. 20261123-298，現場付款</p><p class="detail-p">JR 博多站博多口走路約 10 分，路線筆直<br>地鐵七隈線「櫛田神社前」5 號出口走路 1 分</p></div>
+                </div>
+              </div>
+              <div class="subline">晚餐在飯店附近解決，早點休息</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="24" hidden>
+    <div class="day-theme">
+      <p class="caption">太宰府的楓紅，博多站前的聖誕燈火</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">08:10</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">出門</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">經過明治公園，走到博多巴士總站<br>08:30 搭太宰府直達巴士「旅人」，不用換車</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">09:10</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">太宰府</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">走參道吃吃喝喝、拍楓葉與建築<br>看氛圍為主</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">11:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">回博多</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">搭「旅人」回博多巴士總站</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">12:10</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">午餐・博多站採買</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subline">午餐現場決定</div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">博多站一帶</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">アミュプラザ博多<br>博多阪急<br>KITTE 博多<br>マイング(伴手禮)</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">JR 博多シティ 屋頂</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">11F 屋頂看黃昏風景</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">博多聖誕市集</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">16:00 開始，逛黃昏時段的站前市集</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">17:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">回飯店放戰利品</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">休息一下再出門</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">18:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">晚餐・夜間散步</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">晚餐現場決定<br>散步：福博であい橋、中洲燈飾</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="25" hidden>
+    <div class="day-theme">
+      <p class="caption">市場早餐開始，一路逛進巷弄與黑膠店</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">09:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node flat">
+          <div class="node-head">
+            <div class="node-title">柳橋連合市場 早餐</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">10:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">薬院 → 今泉 → 大名</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">沿路逛、吃吃喝喝<br>黑膠店一定要去</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">14:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node flat">
+          <div class="node-head">
+            <div class="node-title">大濠公園</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">16:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">天神新建築・晚餐</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">ONE FUKUOKA BLDG.<br>天神ビジネスセンターⅡ<br>晚餐在這一帶吃</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">18:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">天神地下街</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">天神地下街 ＋ Aeon Shoppers Fukuoka(09:00－22:00，與地下街連通)</p><p class="detail-p">天神中央公園的聖誕市集，路過感受一下</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">20:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node flat">
+          <div class="node-head">
+            <div class="node-title">回飯店</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="26" hidden>
+    <div class="day-theme">
+      <p class="caption">把自己交給海岸線，糸島的一日</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">08:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">糸島一日遊<span class="tag">跟團</span></div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">08:30－18:30<br>集合地點與細節看訂單通知</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">18:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">回到市區</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">晚餐現場決定<br>最後一晚，整理行李與退稅收據</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="day-panel" data-panel="27" hidden>
+    <div class="day-theme">
+      <p class="caption">毛毛蟲的童年畫頁，帶著滿滿的九州回家</p>
+    </div>
+    <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time muted">—</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">退房・寄放行李</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">退房 11:00(官網訂房可延到 12:00)<br>行李寄在飯店，13:20 前回來拿</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time muted">—</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">福岡縣立美術館</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">艾瑞克・卡爾《好餓的毛毛蟲》展</p><p class="detail-p">剩下的時間找間咖啡店坐坐</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">13:20</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">離開飯店</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">走到博多巴士總站</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">14:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">搭乘 產交高速巴士</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">博多巴士總站 —— 益城インター口<br>13:40、14:00、14:20、14:40 都有車</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">15:30</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">益城 IC 口下車</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">轉搭計程車到阿蘇熊本機場</p><p class="detail-p">11 月起日本改成退稅新制：託運行李前，先在機場完成海關確認(細節在 指南 → 支付)</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-time-col">
+        <div class="tl-time">19:00</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">阿蘇熊本機場起飛</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">KMJ 阿蘇熊本 —— TNN 台南</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+  </section>
+
+  <section class="tab-page" data-tabpage="guide" hidden>
+    <div class="guide-grid" data-guidegrid>
+      <div class="guide-cat-btn" data-guidecat="飯店"><div class="gc-text"><span class="gc-name">飯店</span><span class="gc-sub">四間住宿與訂房資訊</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="交通"><div class="gc-text"><span class="gc-name">交通</span><span class="gc-sub">交通卡、電車、自駕、禮儀</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="車票預約"><div class="gc-text"><span class="gc-name">車票預約</span><span class="gc-sub">列車、訂位與預約番號</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="支付"><div class="gc-text"><span class="gc-name">支付</span><span class="gc-sub">付款方式與退稅新制</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="天氣"><div class="gc-text"><span class="gc-name">天氣</span><span class="gc-sub">每日預報與穿搭</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="黑川溫泉"><div class="gc-text"><span class="gc-name">黑川溫泉</span><span class="gc-sub">入湯手形與泡湯時間</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="插座"><div class="gc-text"><span class="gc-name">插座</span><span class="gc-sub">電壓與插頭規格</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="實用日文"><div class="gc-text"><span class="gc-name">實用日文</span><span class="gc-sub">常用短句附發音</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="緊急聯絡"><div class="gc-text"><span class="gc-name">緊急聯絡</span><span class="gc-sub">警消與辦事處電話</span></div><div class="gc-chevron"></div></div><div class="guide-cat-btn" data-guidecat="旅行期待"><div class="gc-text"><span class="gc-name">旅行期待</span><span class="gc-sub">兩個人各自想要的</span></div><div class="gc-chevron"></div></div>
+    </div>
+    <div class="guide-page" data-guidepage="飯店">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">飯店</p>
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">OMO5 熊本 by 星野集團<br><span style="font-weight:400;font-size:13.5px;color:var(--ink-soft)">11/17－11/20・3 泊</span></div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">訂房資訊</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">預約番號 OKMUKT263975<br>えんたくルーム(雙床)，純住宿<br>45,200 円(44,000 ＋ 住宿稅 1,200)</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">Check in out</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">入住 15:00；退房 11:00</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">位置環境</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">市電「通町筋」下車即到；機場利木津巴士約 40 分，站牌就在飯店門口；到熊本駅搭市電約 17 分</p><p class="detail-p">位在上通・下通拱廊商店街交會處，餐飲、藥妝、百貨、超商都在拱廊內，雨天也能全程有頂棚移動。熊本城走路可到。是四間裡最熱鬧的鬧區核心，拱廊街週末到深夜人潮不斷</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">房型細節</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">21.7㎡<br>兩張床之間擺一張有深度的長桌，概念取自「圓桌」圍坐<br>浴室、洗手台、廁所三分離；館內沒有大浴場</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">附加設施</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">露台可以眺望熊本城；公共區域「OMO Base」有咖啡與餐酒吧、鄰里地圖、住客置物櫃、投幣洗衣</p><p class="detail-p">早餐是 4 款單盤式西式套餐，評價不錯；拱廊街早餐選擇也多</p></div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">inn NOSHIYU 黑川溫泉<br><span style="font-weight:400;font-size:13.5px;color:var(--ink-soft)">11/20－11/21・1 泊</span></div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">訂房資訊</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">預約 no. 8UAVTJE9<br>確認碼 2465939345<br>203 Twin，純住宿，33,300 円</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">Check in out</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">入住 15:00－18:00；退房 10:00<br>官網訂房可以問能不能延到 11:00</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">位置環境</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">在溫泉街內，阿蘇駅取車後自駕前往；免費停車 4 台、不需預約</p><p class="detail-p">入夜後溫泉街店家幾乎全部打烊，沒有超商。房內有微波爐、熱水壺、冰箱，可以先在阿蘇採買帶進來。晚上很安靜，聽得到溪聲；路燈少，出門帶手機照明</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">房型細節</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">24.2㎡，全館只有 4 間房<br>木質調的和洋摩登空間，有迷你廚房、藍牙喇叭、書桌、保險箱；房內是淋浴間</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">泡湯</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">貸切內湯：源泉掛流，1 次 40 分，空著就能用，不分早晚<br>姊妹館「のし湯」男女露天風呂：15:00－22:00／06:30－10:30，被雜木林環繞的岩造湯池</p><p class="detail-p">泉質是弱酸性單純溫泉，觸感溫和</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">附加設施</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">1F Lounge 有小書齋與圍爐，免費咖啡、製冰與備品；姊妹館「のし湯」有 Bar<br>沒有早餐</p></div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">Hotel H2 Nagasaki<br><span style="font-weight:400;font-size:13.5px;color:var(--ink-soft)">11/21－11/23・2 泊</span></div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">訂房資訊</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">預約番號 IY1656522779(一休 ikyu)<br>Bunk Room，41,440 円(含住宿稅)</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">Check in out</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">入住 14:00－24:00；退房 11:00(1F、3F 有退房箱)</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">位置環境</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">路面電車「西浜町」走路約 2 分；市電可以直達平和公園、大浦天主堂、哥拉巴園；機場巴士「中央橋」站走路 1 分</p><p class="detail-p">緊鄰浜町拱廊商店街，中華街、眼鏡橋都在步行圈，周邊餐飲密集，外食可以帶進館內。思案橋夜生活區走得到，但飯店本身不在裡面</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">房型細節</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">12㎡ 上下舖；下舖寬 140cm、上舖寬 120cm<br>房內有電視、微波爐、冰箱、吹風機，床下可收納</p><p class="detail-p">房內沒有淋浴間，要到 11F 洗澡</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">大浴場</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">11F，有露天風呂、絹絲湯與臥湯<br>16:00－02:00／05:00－10:00<br>擁擠狀況可以用手機查</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">附加設施</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">免費飲料咖啡吧、免費 VOD、可外接 HDMI、洗衣設備</p><p class="detail-p">早餐 Buffet 06:30－10:00，每人 1,800 円，評價很好</p></div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">BOUNCEE by RIHGA 福岡博多<br><span style="font-weight:400;font-size:13.5px;color:var(--ink-soft)">11/23－11/27・4 泊</span></div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">訂房資訊</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">預約 No. 20261123-298<br>Standard Twin，純住宿，現場付款<br>78,200 円(76,600 ＋ 住宿稅 1,600)</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">Check in out</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">入住 15:00－24:00；退房 11:00<br>官網訂房特典可延到 12:00</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">位置環境</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">地鐵七隈線「櫛田神社前」5 號出口走路 1 分；空港線「祇園」5 號出口走路 5 分；JR 博多站博多口走路約 10 分，路線筆直</p><p class="detail-p">博多舊市街的寺社區，超商與餐飲密集，超市就在旁邊；Canal City、中洲屋台街、櫛田神社都走得到。中洲隔著博多川，人流比熊本那一段單純</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">房型細節</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">18㎡<br>Serta 床墊、50 吋壁掛電視、ReFa 吹風機、USB 插座，床下可收納；房內是淋浴間</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">大浴場</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">2F，有三溫暖與冷水浴(沒有露天)<br>15:00－25:00／06:00－10:00</p></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">附加設施</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><p class="detail-p">2F 餐廳酒吧、7F 投幣洗衣<br>早餐 06:30－10:30，每人 3,000 円</p><p class="detail-p">2026 年 9 月開幕，母集團是大阪的麗嘉皇家飯店</p></div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div><div class="guide-page" data-guidepage="交通">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">交通</p>
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">交通卡使用</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">九州通用 SUGOCA／nimoca／はやかけん，跟 Suica、ICOCA 互通。iPhone 可以在「錢包」App 直接加入 Suica，綁信用卡加值</p><p class="detail-p">JR、福岡地鐵與巴士、長崎路面電車都可以刷</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">熊本的巴士與市電</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">熊本縣內的路線巴士(含機場利木津、產交巴士)已經不收 Suica 這類全國交通 IC 卡，改用信用卡感應支付，或付現</p><p class="detail-p">熊本市電上車看一下刷卡機的標示，準備一張可感應的信用卡和零錢最保險</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">長崎路面電車</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">後門上車、前門下車，下車時付錢<br>常用：1 號系統(赤迫 ⇄ 崇福寺)、3 號系統(赤迫 ⇄ 蛍茶屋)、5 號系統(石橋 ⇄ 蛍茶屋)</p><p class="detail-p">飯店最近的電停是「西浜町」</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">阿蘇自駕</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">11/20 10:00 阿蘇駅取車，11/21 15:30 還車<br>日本靠左行駛、右駕；記得帶台灣駕照 ＋ 日文譯本 ＋ 護照</p><p class="detail-p">山區早晚氣溫低，留意路面結霜與起霧</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">APP 叫車</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">可以用 GO／Uber 綁卡叫車，下車自動扣款。11/27 益城 IC 口到機場這段會用到計程車</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">搭乘禮儀</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">手扶梯<br>福岡多站左側</p><p class="detail-p">公車<br>後門上車、前門下車，下車才付錢</p><p class="detail-p">計程車<br>車門自動開關，站在旁邊等門開就好</p></div>
+          </div>
+        </div>
+      </div>
+    </div><div class="guide-page" data-guidepage="車票預約">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">車票預約</p>
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">JR 指定席特急券</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">兩張都只有特急券，乘車券要另外買；出發日當天前在車站領取</p><p class="detail-p">11/21(六) 阿蘇男孩<br>阿蘇 15:56 → 熊本 17:08<br>4 號車 8 排 CD，預約番號 65518<br>每人 1,980 円，共 3,960 円</p><p class="detail-p">11/23(一) ふたつ星4047 吧台座<br>長崎 14:53 → 武雄溫泉 17:54<br>3 號車 12 番 AD，預約番號 68244<br>每人 3,030 円，共 6,060 円</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">還沒買的車票</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">11/20 熊本 → 阿蘇(08:25 → 09:54)<br>11/21 熊本 → 長崎(新幹線 ＋ 轉乘)<br>11/23 武雄溫泉 → 博多 Relay Kamome 50 號(18:15 → 19:15)<br>以及兩段觀光列車的乘車券</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">餐廳訂位</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">11/21 20:15 桃源洞(長崎)095-823-6786<br>11/22 12:15 むつ五郎(長崎)095-826-6560</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">其他預約</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">11/20－11/21 阿蘇駅租車(10:00 取、15:30 還)<br>11/26 糸島一日遊 08:30－18:30</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">回程交通</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">11/27 博多巴士總站 14:00 產交高速巴士 → 15:30 益城インター口 → 計程車到機場<br>19:00 起飛</p></div>
+          </div>
+        </div>
+      </div>
+    </div><div class="guide-page" data-guidepage="支付">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">支付</p>
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">信用卡</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">飯店／訂位餐廳／百貨／展覽門票／便利商店／熊本的巴士(感應支付)</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">現金</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">市場／攤販／小店／神社／黑川溫泉街／路面電車備用零錢</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">退稅(11 月新制)</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">2026/11/1 起，日本改成「先付含稅價，出境時退稅」</p><p class="detail-p">1. 在免稅店結帳時出示護照，照樣付含稅價，並登記退款方式(信用卡等)<br>2. 回程在機場託運行李前，先到海關確認購買的商品<br>3. 確認後，稅金才會退回登記的管道</p><p class="detail-p">同店同天滿 5,000 円(未稅)才適用；商品要帶出境，出境前先別送人或用掉。退款方式與手續費每家店不同，結帳時問清楚</p></div>
+          </div>
+        </div>
+      </div>
+    </div><div class="guide-page" data-guidepage="天氣">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">天氣</p>
+      <div class="plain-detail"><p class="detail-p">11 月下旬的九州，市區白天約 13－18°C、早晚 7－10°C；阿蘇與黑川在山上，早晚會接近 0－5°C</p><p class="detail-p">洋蔥式穿搭：薄長袖 ＋ 針織或刷毛 ＋ 防風外套。阿蘇那兩天加圍巾、毛帽；泡完湯走回住宿記得穿暖</p></div><div class="weather-list" data-weatherlist><p class="empty-hint">預報讀取中…</p></div>
+    </div><div class="guide-page" data-guidepage="黑川溫泉">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">黑川溫泉</p>
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">入湯手形</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">在溫泉街買一塊木牌，可以到不同旅館泡露天風呂<br>風之舍 18:00 關門，11/20 傍晚先買好</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">想去的湯屋</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">いこい旅館(08:30－20:30)→ 11/20 晚上<br>こうの湯 → 11/21 早上<br>山河<br>やまびこ旅館<br>瀬の本高原ホテル</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">住宿自己的湯</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">inn NOSHIYU 貸切內湯：1 次 40 分，空著就能用<br>姊妹館「のし湯」露天：15:00－22:00／06:30－10:30</p></div>
+          </div>
+        </div>
+      </div>
+    </div><div class="guide-page" data-guidepage="插座">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">插座</p>
+      <div class="guide-flat"><div class="plain-detail"><p class="detail-p">日本是 100V、雙扁腳插座，跟台灣一樣，充電器可直接用，不用轉接頭</p></div></div>
+    </div><div class="guide-page" data-guidepage="實用日文">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">實用日文</p>
+      <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">購物類</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">請問這個多少錢?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">これはいくらですか？</span><span class="jp-romaji">Kore wa ikura desu ka?</span></div><button class="speak-btn" data-speak="これはいくらですか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">可以刷卡嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">カードは使えますか？</span><span class="jp-romaji">Kaado wa tsukaemasu ka?</span></div><button class="speak-btn" data-speak="カードは使えますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">我要這個</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">これをください</span><span class="jp-romaji">Kore o kudasai</span></div><button class="speak-btn" data-speak="これをください" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">可以試穿嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">試着してもいいですか？</span><span class="jp-romaji">Shichaku shite mo ii desu ka?</span></div><button class="speak-btn" data-speak="試着してもいいですか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">有其他顏色/尺寸嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">他の色／サイズはありますか？</span><span class="jp-romaji">Hoka no iro / saizu wa arimasu ka?</span></div><button class="speak-btn" data-speak="他の色／サイズはありますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">我想要免稅</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">免税でお願いします</span><span class="jp-romaji">Menzei de onegaishimasu</span></div><button class="speak-btn" data-speak="免税でお願いします" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">請幫我分開包裝</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">別々に包んでください</span><span class="jp-romaji">Betsubetsu ni tsutsunde kudasai</span></div><button class="speak-btn" data-speak="別々に包んでください" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">只是看看(不用招呼我)</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">見ているだけです</span><span class="jp-romaji">Miteiru dake desu</span></div><button class="speak-btn" data-speak="見ているだけです" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">飲食類</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">兩位</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">二人です</span><span class="jp-romaji">Futari desu</span></div><button class="speak-btn" data-speak="二人です" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">有中文/英文菜單嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">中国語／英語のメニューはありますか？</span><span class="jp-romaji">Chuugokugo / eigo no menyuu wa arimasu ka?</span></div><button class="speak-btn" data-speak="中国語／英語のメニューはありますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">我要點餐</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">注文をお願いします</span><span class="jp-romaji">Chuumon o onegaishimasu</span></div><button class="speak-btn" data-speak="注文をお願いします" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">請給我這個</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">これをお願いします</span><span class="jp-romaji">Kore o onegaishimasu</span></div><button class="speak-btn" data-speak="これをお願いします" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">很好吃!</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">おいしいです！</span><span class="jp-romaji">Oishii desu!</span></div><button class="speak-btn" data-speak="おいしいです！" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">請結帳</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">お会計をお願いします</span><span class="jp-romaji">Okaikei o onegaishimasu</span></div><button class="speak-btn" data-speak="お会計をお願いします" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">可以外帶嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">持ち帰りできますか？</span><span class="jp-romaji">Mochikaeri dekimasu ka?</span></div><button class="speak-btn" data-speak="持ち帰りできますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    <div class="node" data-node>
+          <div class="node-head" data-toggle>
+            <div class="node-title">詢問類</div>
+            <div class="chevron"></div>
+          </div>
+          <div class="node-content" data-content>
+            <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">不好意思</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">すみません</span><span class="jp-romaji">Sumimasen</span></div><button class="speak-btn" data-speak="すみません" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">請問廁所在哪裡?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">トイレはどこですか？</span><span class="jp-romaji">Toire wa doko desu ka?</span></div><button class="speak-btn" data-speak="トイレはどこですか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">請問______怎麼走?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">______はどこですか？</span><span class="jp-romaji">___ wa doko desu ka?</span></div><button class="speak-btn" data-speak="______はどこですか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">請問可以幫我們拍照嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">写真を撮ってもらえますか？</span><span class="jp-romaji">Shashin o totte moraemasu ka?</span></div><button class="speak-btn" data-speak="写真を撮ってもらえますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">我聽不太懂日文</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">日本語はあまりわかりません</span><span class="jp-romaji">Nihongo wa amari wakarimasen</span></div><button class="speak-btn" data-speak="日本語はあまりわかりません" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">可以說慢一點嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">ゆっくり話してもらえますか？</span><span class="jp-romaji">Yukkuri hanashite moraemasu ka?</span></div><button class="speak-btn" data-speak="ゆっくり話してもらえますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">謝謝</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">ありがとうございます</span><span class="jp-romaji">Arigatou gozaimasu</span></div><button class="speak-btn" data-speak="ありがとうございます" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">住宿與溫泉</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">可以延到 11 點退房嗎?(官網訂房)</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">公式HPから予約したのですが、チェックアウトを11時まで延長できますか？</span><span class="jp-romaji">Koushiki HP kara yoyaku shita no desu ga, chekkuauto o juuichi-ji made enchou dekimasu ka?</span></div><button class="speak-btn" data-speak="公式HPから予約したのですが、チェックアウトを11時まで延長できますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">可以寄放行李嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">荷物を預かってもらえますか？</span><span class="jp-romaji">Nimotsu o azukatte moraemasu ka?</span></div><button class="speak-btn" data-speak="荷物を預かってもらえますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">我想用入湯手形</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">入湯手形でお願いします</span><span class="jp-romaji">Nyuutou tegata de onegaishimasu</span></div><button class="speak-btn" data-speak="入湯手形でお願いします" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">我對牛肉過敏</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">牛肉アレルギーがあります</span><span class="jp-romaji">Gyuuniku arerugii ga arimasu</span></div><button class="speak-btn" data-speak="牛肉アレルギーがあります" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+              <div class="subitem" data-subitem>
+                <div class="sub-head" data-subtoggle>
+                  <div class="sub-title">這道菜有牛肉嗎?</div>
+                  <div class="sub-chevron"></div>
+                </div>
+                <div class="sub-content" data-subcontent>
+                  <div class="sub-detail"><div class="phrase-jp"><div class="jp-block"><span class="jp-text">これに牛肉は入っていますか？</span><span class="jp-romaji">Kore ni gyuuniku wa haitte imasu ka?</span></div><button class="speak-btn" data-speak="これに牛肉は入っていますか？" aria-label="播放發音">&#128266;</button></div></div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div><div class="guide-page" data-guidepage="緊急聯絡">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">緊急聯絡</p>
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">當地緊急號碼</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">警察：110<br>救護車／火警：119</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">旅遊諮詢熱線</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">外國旅客：05038162787 (24小時有中文)<br>JNTO 訪日旅客服務熱線：0570011177</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">台北駐大阪經濟文化辦事處 福岡分處</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">福岡市中央區櫻坂 3-12-42<br>上班時間：092-734-2810<br>緊急聯絡：090-1922-9740(重大急難才撥)</p><p class="detail-p">外交部旅外國人急難救助專線(台灣)：+886-800-085-095</p></div>
+          </div>
+        </div>
+      </div>
+    </div><div class="guide-page" data-guidepage="旅行期待">
+      <div class="guide-back" data-guideback>
+        <div class="back-chevron"></div>
+        <span>分類</span>
+      </div>
+      <p class="guide-cat-title">旅行期待</p>
+      <p class="guide-cat-sub">排行程、臨時改計畫時回來看一眼</p>
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">阿傑</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">吃一點美食<br>體驗當地超市、生活、咖啡<br>想逛街，買一些台灣沒有的東西<br>搜尋唱片及音響設備<br>買衣服、褲子<br>古蹟、景點、壯闊風景<br>早起，體驗地方一整天的生活<br>買伴手禮給阿公阿嬤</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node" data-node>
+        <div class="node-head" data-toggle>
+          <div class="node-title">阿萱</div>
+          <div class="chevron"></div>
+        </div>
+        <div class="node-content" data-content>
+          <div class="content-pad">
+              <div class="plain-detail"><p class="detail-p">買鞋子、買衣服，快狠準<br>逛有美感的商店，有就好<br>每天 1.5－2 小時梳理自己的個人空間<br>去大自然的地方，有就好<br>體驗當地生活，有生活探險感<br>睡飽不熬夜，11:30 休息、7 點起床<br>每天都打扮得很漂亮出門</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-page" data-tabpage="expense" hidden>
+    <div class="expense-subnav">
+      <button class="active" data-expensesub="add">記一筆</button>
+      <button data-expensesub="overview">總覽</button>
+    </div>
+    <div class="sync-status" data-syncstatus>同步中…</div>
+
+    <div class="expense-page active" data-expensepage="add">
+      <p class="field-label">誰付的</p>
+      <div class="chip-row" data-expensepayers>
+        <div class="chip" data-payer="阿萱">阿萱</div>
+        <div class="chip" data-payer="阿傑">阿傑</div>
+      </div>
+
+      <p class="field-label">分類</p>
+      <div class="chip-row" data-expensecats>
+        <div class="chip" data-cat="餐飲">餐飲</div>
+        <div class="chip" data-cat="咖啡甜點">咖啡甜點</div>
+        <div class="chip" data-cat="超市超商">超市超商</div>
+        <div class="chip" data-cat="交通">交通</div>
+        <div class="chip" data-cat="住宿">住宿</div>
+        <div class="chip" data-cat="購物">購物</div>
+        <div class="chip" data-cat="唱片音響">唱片音響</div>
+        <div class="chip" data-cat="伴手禮">伴手禮</div>
+        <div class="chip" data-cat="門票體驗">門票體驗</div>
+        <div class="chip" data-cat="其他">其他</div>
+      </div>
+
+      <p class="field-label">金額</p>
+      <div class="amount-row">
+        <input class="amount-input" type="text" inputmode="decimal" placeholder="0" data-expenseamount>
+        <div class="currency-toggle" data-expensecurrency>
+          <button class="active" data-currency="JPY">日幣</button>
+          <button data-currency="TWD">台幣</button>
+        </div>
+      </div>
+      <div class="amount-preview" data-amountpreview></div>
+
+      <p class="field-label">付款方式</p>
+      <div class="chip-row" data-expensemethods>
+        <div class="chip" data-method="現金">現金</div>
+        <div class="chip" data-method="刷卡">刷卡</div>
+        <div class="chip" data-method="電子支付">電子支付</div>
+      </div>
+
+      <p class="field-label">日期</p>
+      <input class="date-input" type="date" data-expensedate>
+
+      <p class="field-label">備註</p>
+      <textarea class="note-input" rows="2" placeholder="選填，例如店名" data-expensenote></textarea>
+
+      <button class="add-btn" data-expenseadd>新增紀錄</button>
+
+      <div class="entry-list">
+        <p class="entry-list-title">所有紀錄</p>
+        <div data-expenseentries></div>
+      </div>
+    </div>
+
+    <div class="expense-page" data-expensepage="overview">
+      <div class="overview-grand">
+        <div class="label">總額（台幣）</div>
+        <div class="value" data-overview-grand>NT$0</div>
+        <div class="hint" data-overview-grand-hint>日幣依消費當天的匯率換算成台幣</div>
+      </div>
+      <div class="rate-note" data-ratenote></div>
+      <div class="overview-totals tight">
+        <div class="overview-total-card">
+          <div class="label">日幣小計</div>
+          <div class="value" data-overview-jpy>¥0</div>
+        </div>
+        <div class="overview-total-card">
+          <div class="label">台幣小計</div>
+          <div class="value" data-overview-twd>NT$0</div>
+        </div>
+      </div>
+      <div class="overview-totals" data-overview-payers style="padding-top:0"></div>
+      <div class="mode-row">
+        <button class="active" data-overviewmode="cat">依分類</button>
+        <button data-overviewmode="day">依日期</button>
+        <button data-overviewmode="method">依付款方式</button>
+      </div>
+      <div class="cat-breakdown" data-overview-breakdown></div>
+    </div>
+  </section>
+
+  <nav class="bottom-nav">
+    <button class="active" data-tab="itinerary">行程</button>
+    <button data-tab="guide">指南</button>
+    <button data-tab="expense">記帳</button>
+  </nav>
+
+  <div class="toast" data-toast></div>
+</div>
+
+<script>
+  /* ===== 行程日期設定 ===== */
+  const TRIP_YEAR = 2026, TRIP_MONTH = 10; // 11 月(0 起算)
+  const DAY_CITY = {"17": "熊本", "18": "熊本", "19": "熊本", "20": "阿蘇", "21": "阿蘇", "22": "長崎", "23": "長崎", "24": "福岡", "25": "福岡", "26": "福岡", "27": "福岡"};
+  const CITY_GEO = {
+    '熊本': [32.8031, 130.7079],
+    '阿蘇': [32.9520, 131.1210],
+    '長崎': [32.7503, 129.8777],
+    '福岡': [33.5902, 130.4017]
+  };
+  const WD = ['日','一','二','三','四','五','六'];
+
+  /* ===== bottom tab navigation ===== */
+  document.querySelectorAll('.bottom-nav button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-page').forEach(p=>{
+        p.hidden = p.dataset.tabpage !== tab;
+      });
+      window.scrollTo(0,0);
+      if(tab === 'expense') refreshExpenses();
+    });
+  });
+
+  /* ===== day pills (itinerary) ===== */
+  function selectDay(day){
+    document.querySelectorAll('.day-pill').forEach(p=>p.classList.toggle('active', p.dataset.day === String(day)));
+    document.querySelectorAll('.day-panel').forEach(panel=>{
+      panel.hidden = panel.dataset.panel !== String(day);
+    });
+    const pill = document.querySelector(`.day-pill[data-day="${day}"]`);
+    if(pill && pill.scrollIntoView) pill.scrollIntoView({inline:'center', block:'nearest'});
+    updateWeatherBadge(Number(day));
+  }
+  document.querySelectorAll('.day-pill').forEach(pill=>{
+    pill.addEventListener('click', ()=> selectDay(pill.dataset.day));
+  });
+
+  /* ===== weather (Open-Meteo，依每天所在城市) ===== */
+  const weatherByDay = {}; // day -> {hi, lo, code, rain}
+  function weatherText(code){
+    if(code === 0) return '晴';
+    if(code === 1) return '大致晴朗';
+    if(code === 2) return '多雲時晴';
+    if(code === 3) return '陰';
+    if(code === 45 || code === 48) return '有霧';
+    if(code >= 51 && code <= 57) return '毛毛雨';
+    if(code >= 61 && code <= 67) return '雨';
+    if(code >= 71 && code <= 77) return '雪';
+    if(code >= 80 && code <= 82) return '陣雨';
+    if(code >= 85 && code <= 86) return '陣雪';
+    if(code >= 95) return '雷雨';
+    return '－';
+  }
+  function updateWeatherBadge(day){
+    const badge = document.querySelector('[data-weatherbadge]');
+    const city = DAY_CITY[day];
+    document.querySelector('[data-weathercity]').textContent = city || '－';
+    const w = weatherByDay[day];
+    document.querySelector('[data-weatherhi]').textContent = w ? `${w.hi}°` : '－°';
+    document.querySelector('[data-weatherlo]').textContent = w ? `${w.lo}°` : '－°';
+    badge.style.visibility = 'visible';
+  }
+  function renderWeatherList(){
+    const box = document.querySelector('[data-weatherlist]');
+    const days = Object.keys(DAY_CITY).map(Number).sort((a,b)=>a-b);
+    const rows = days.filter(d => weatherByDay[d]).map(d=>{
+      const w = weatherByDay[d];
+      const wd = WD[new Date(TRIP_YEAR, TRIP_MONTH, d).getDay()];
+      const rain = (w.rain === null || w.rain === undefined) ? '' : `☔${w.rain}%`;
+      return `<div class="weather-row"><div class="wr-date">${TRIP_MONTH+1}/${d}<span class="wr-wd">(${wd})</span></div><div class="wr-cond">${DAY_CITY[d]}・${weatherText(w.code)}</div><div class="wr-temp">${w.hi}°<span class="wr-lo">/${w.lo}°</span></div><div class="wr-rain">${rain}</div></div>`;
+    });
+    box.innerHTML = rows.length ? rows.join('') : '<p class="empty-hint">預報暫時抓不到，連上網路後再打開看看</p>';
+  }
+  (function loadWeather(){
+    const cities = Array.from(new Set(Object.values(DAY_CITY)));
+    const jobs = cities.map(city=>{
+      const [lat, lon] = CITY_GEO[city];
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=16`;
+      return fetch(url).then(r=>r.json()).then(data=>{
+        (data.daily.time || []).forEach((iso, i)=>{
+          const [y, m, d] = iso.split('-').map(Number);
+          if(y !== TRIP_YEAR || m !== TRIP_MONTH+1) return;
+          if(DAY_CITY[d] !== city) return;
+          weatherByDay[d] = {
+            hi: Math.round(data.daily.temperature_2m_max[i]),
+            lo: Math.round(data.daily.temperature_2m_min[i]),
+            code: data.daily.weather_code[i],
+            rain: data.daily.precipitation_probability_max ? data.daily.precipitation_probability_max[i] : null
+          };
+        });
+      }).catch(()=>{});
+    });
+    Promise.all(jobs).then(()=>{
+      const active = document.querySelector('.day-pill.active');
+      if(active) updateWeatherBadge(Number(active.dataset.day));
+      renderWeatherList();
+    });
+  })();
+
+  /* ===== jump to today's day panel on load ===== */
+  (function jumpToToday(){
+    const now = new Date();
+    let day = Number(document.querySelector('.day-pill').dataset.day);
+    if(now.getFullYear() === TRIP_YEAR && now.getMonth() === TRIP_MONTH && DAY_CITY[now.getDate()]){
+      day = now.getDate();
+    }
+    selectDay(day);
+  })();
+
+  /* ===== phrase speaker ===== */
+  document.querySelectorAll('[data-speak]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(!('speechSynthesis' in window)){
+        toast('這台裝置不支援語音朗讀');
+        return;
+      }
+      speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(btn.dataset.speak);
+      utter.lang = 'ja-JP';
+      utter.rate = 0.9;
+      speechSynthesis.speak(utter);
+    });
+  });
+
+  /* ===== guide: category grid <-> detail page ===== */
+  document.querySelectorAll('[data-guidecat]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const cat = btn.dataset.guidecat;
+      document.querySelector('[data-guidegrid]').style.display = 'none';
+      document.querySelectorAll('.guide-page').forEach(p=>{
+        p.classList.toggle('active', p.dataset.guidepage === cat);
+      });
+      window.scrollTo(0,0);
+    });
+  });
+  document.querySelectorAll('[data-guideback]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.guide-page').forEach(p=>p.classList.remove('active'));
+      document.querySelector('[data-guidegrid]').style.display = 'flex';
+    });
+  });
+
+  /* ===== accordion: main node toggle ===== */
+  document.querySelectorAll('[data-toggle]').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const node = head.closest('[data-node]');
+      const content = node.querySelector(':scope > [data-content]');
+      const isOpen = node.classList.contains('open');
+      const scope = node.closest('.day-panel, .guide-page') || document;
+
+      scope.querySelectorAll('.node.open').forEach(other=>{
+        if(other === node) return;
+        const otherContent = other.querySelector(':scope > [data-content]');
+        otherContent.style.maxHeight = otherContent.scrollHeight + 'px';
+        requestAnimationFrame(()=>{ otherContent.style.maxHeight = '0px'; });
+        other.classList.remove('open');
+      });
+
+      if(isOpen){
+        content.style.maxHeight = content.scrollHeight + 'px';
+        requestAnimationFrame(()=>{ content.style.maxHeight = '0px'; });
+        node.classList.remove('open');
+      } else {
+        node.classList.add('open');
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.addEventListener('transitionend', function fix(){
+          if(node.classList.contains('open')) content.style.maxHeight = 'none';
+          content.removeEventListener('transitionend', fix);
+        });
+      }
+    });
+  });
+
+  /* ===== accordion: sub-item toggle ===== */
+  document.querySelectorAll('[data-subtoggle]').forEach(head=>{
+    head.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const item = head.closest('[data-subitem]');
+      const content = item.querySelector('[data-subcontent]');
+      const isOpen = item.classList.contains('open');
+      const container = item.closest('.content-pad');
+
+      container.querySelectorAll('.subitem.open').forEach(other=>{
+        if(other === item) return;
+        const otherContent = other.querySelector('[data-subcontent]');
+        otherContent.style.maxHeight = otherContent.scrollHeight + 'px';
+        requestAnimationFrame(()=>{ otherContent.style.maxHeight = '0px'; });
+        other.classList.remove('open');
+      });
+
+      if(isOpen){
+        content.style.maxHeight = content.scrollHeight + 'px';
+        requestAnimationFrame(()=>{ content.style.maxHeight = '0px'; });
+        item.classList.remove('open');
+      } else {
+        item.classList.add('open');
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.addEventListener('transitionend', function fix(){
+          if(item.classList.contains('open')) content.style.maxHeight = 'none';
+          content.removeEventListener('transitionend', fix);
+        });
+      }
+      const parentNode = item.closest('[data-node]');
+      if(parentNode.classList.contains('open')){
+        const parentContent = parentNode.querySelector(':scope > [data-content]');
+        setTimeout(()=>{ parentContent.style.maxHeight = parentContent.scrollHeight + 'px'; }, 260);
+      }
+    });
+  });
+
+  /* ===== toast ===== */
+  let toastTimer = null;
+  function toast(msg){
+    const el = document.querySelector('[data-toast]');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> el.classList.remove('show'), 2400);
+  }
+
+  /* =====================================================
+     記帳（Supabase 雲端共用，兩支手機看到同一份）
+     ===================================================== */
+  const SUPABASE_URL = 'https://beqsbrvkdbwxvuhjipjv.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlcXNicnZrZGJ3eHZ1aGppcGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNDQwMTQsImV4cCI6MjEwNDYyMDAxNH0.5tptddl0gwLWpCunfgzh-2VlvSXg8zIgbY4N5rpOhUc';
+  const EXPENSE_TABLE = 'kyushu_expenses';
+  const SB_ENDPOINT = `${SUPABASE_URL}/rest/v1/${EXPENSE_TABLE}`;
+  const SB_HEADERS = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json'
+  };
+  const CATS = ['餐飲','咖啡甜點','超市超商','交通','住宿','購物','唱片音響','伴手禮','門票體驗','其他'];
+  const PAYERS = ['阿萱','阿傑'];
+  const METHODS = ['現金','刷卡','電子支付'];
+
+  const LS_CACHE = 'kyushu_expense_cache_v1';
+  const LS_PENDING = 'kyushu_expense_pending_v1';
+  const LS_PREFS = 'kyushu_expense_prefs_v1';
+  const LS_FX = 'kyushu_fx_v1';
+
+  function lsGet(key, fallback){
+    try{ const v = JSON.parse(localStorage.getItem(key)); return v === null || v === undefined ? fallback : v; }catch(e){ return fallback; }
+  }
+  function lsSet(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  }
+
+  let expenseCache = lsGet(LS_CACHE, []);
+  let pendingList = lsGet(LS_PENDING, []);
+  let prefs = lsGet(LS_PREFS, {});
+  let cloudState = 'loading'; // loading | ok | offline | notable
+  let lastSyncAt = null;
+  let lastRenderKey = '';
+  let latestRate = null;
+
+  function esc(s){
+    return String(s === null || s === undefined ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function localDateStr(d){
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  }
+  function todayStr(){ return localDateStr(new Date()); }
+  function dayLabel(dateStr){
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return `${m}/${d}（${WD[new Date(y, m-1, d).getDay()]}）`;
+  }
+  function uuid(){
+    if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    const b = new Uint8Array(16);
+    if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(b);
+    else for(let i=0;i<16;i++) b[i] = Math.floor(Math.random()*256);
+    b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+    const h = Array.from(b, x => x.toString(16).padStart(2,'0')).join('');
+    return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+  }
+  function fmtNT(n){ return `NT$${Math.round(Number(n)).toLocaleString('zh-Hant')}`; }
+  function fmtJPY(n){ return `¥${Math.round(Number(n)).toLocaleString('zh-Hant')}`; }
+  function fmtAmount(n, currency){ return currency === 'JPY' ? fmtJPY(n) : fmtNT(n); }
+
+  /* ---------- 匯率：依「消費日期」抓當天的日圓→台幣匯率 ---------- */
+  let fxCache = lsGet(LS_FX, {}); // { 'YYYY-MM-DD': {r, t, exact} }
+  async function fetchRateFrom(urls){
+    for(const url of urls){
+      try{
+        const res = await fetch(url);
+        if(!res.ok) continue;
+        const data = await res.json();
+        const rate = data.jpy && data.jpy.twd;
+        if(rate) return Number(rate);
+      }catch(e){ /* 換下一個來源 */ }
+    }
+    return null;
+  }
+  async function getRateForDate(dateStr){
+    const hit = fxCache[dateStr];
+    if(hit && (hit.exact || (Date.now() - hit.t) < 1000*60*60*3)) return hit.r;
+    let rate = null, exact = false;
+    if(dateStr <= todayStr()){
+      rate = await fetchRateFrom([
+        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${dateStr}/v1/currencies/jpy.json`,
+        `https://${dateStr}.currency-api.pages.dev/v1/currencies/jpy.json`
+      ]);
+      // 今天的匯率白天還可能更新，過了當天才視為定案
+      exact = !!rate && dateStr < todayStr();
+    }
+    if(!rate){
+      rate = await fetchRateFrom([
+        'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/jpy.json',
+        'https://latest.currency-api.pages.dev/v1/currencies/jpy.json'
+      ]);
+    }
+    if(rate){
+      fxCache[dateStr] = {r: rate, t: Date.now(), exact};
+      lsSet(LS_FX, fxCache);
+      return rate;
+    }
+    return hit ? hit.r : null;
+  }
+  async function loadLatestRate(){
+    const r = await getRateForDate(todayStr());
+    if(r){
+      latestRate = r;
+      updateRateNote();
+      updatePreview();
+      renderAll(true);
+    }
+  }
+  function toTWD(e){
+    if(e.currency !== 'JPY') return Number(e.amount);
+    const r = Number(e.rate_to_twd) || latestRate;
+    return r ? Number(e.amount) * r : null;
+  }
+
+  /* ---------- 雲端存取 ---------- */
+  async function fetchExpenses(){
+    const res = await fetch(`${SB_ENDPOINT}?select=*&order=spent_on.desc,created_at.desc`, {headers: SB_HEADERS, cache: 'no-store'});
+    if(!res.ok){
+      const err = new Error('fetch failed');
+      err.status = res.status;
+      throw err;
+    }
+    return await res.json();
+  }
+  async function postExpense(entry){
+    const res = await fetch(SB_ENDPOINT, {
+      method: 'POST',
+      headers: {...SB_HEADERS, 'Prefer': 'return=minimal'},
+      body: JSON.stringify(entry)
+    });
+    if(res.ok || res.status === 409) return true; // 409 = 這筆之前已經傳成功
+    const err = new Error('add failed');
+    err.status = res.status;
+    throw err;
+  }
+  async function deleteExpense(id){
+    const res = await fetch(`${SB_ENDPOINT}?id=eq.${encodeURIComponent(id)}`, {method: 'DELETE', headers: SB_HEADERS});
+    if(!res.ok) throw new Error('delete failed');
+  }
+  async function patchRate(id, rate){
+    try{
+      await fetch(`${SB_ENDPOINT}?id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: {...SB_HEADERS, 'Prefer': 'return=minimal'},
+        body: JSON.stringify({rate_to_twd: rate})
+      });
+    }catch(e){}
+  }
+
+  async function flushPending(){
+    if(pendingList.length === 0) return;
+    const remain = [];
+    for(const p of pendingList){
+      try{
+        if(p.currency === 'JPY' && !p.rate_to_twd){
+          p.rate_to_twd = await getRateForDate(p.spent_on);
+        }
+        await postExpense(p);
+      }catch(e){
+        remain.push(p);
+      }
+    }
+    pendingList = remain;
+    lsSet(LS_PENDING, pendingList);
+  }
+
+  async function backfillRates(){
+    const missing = expenseCache.filter(e => e.currency === 'JPY' && !e.rate_to_twd);
+    if(missing.length === 0) return;
+    for(const e of missing){
+      const r = await getRateForDate(e.spent_on);
+      if(r){
+        e.rate_to_twd = r;
+        patchRate(e.id, r);
+      }
+    }
+    lsSet(LS_CACHE, expenseCache);
+    renderAll(true);
+  }
+
+  let refreshing = false;
+  async function refreshExpenses(){
+    if(refreshing) return;
+    refreshing = true;
+    try{
+      await flushPending();
+      expenseCache = await fetchExpenses();
+      lsSet(LS_CACHE, expenseCache);
+      cloudState = 'ok';
+      lastSyncAt = new Date();
+    }catch(e){
+      cloudState = (e.status === 404 || e.status === 401 || e.status === 403) ? 'notable' : 'offline';
+    }
+    refreshing = false;
+    renderAll();
+    if(cloudState === 'ok') backfillRates();
+  }
+
+  function allEntries(){
+    const sentIds = new Set(expenseCache.map(e => e.id));
+    const pend = pendingList.filter(p => !sentIds.has(p.id)).map(p => ({...p, _pending: true}));
+    return pend.concat(expenseCache).sort((a,b)=>{
+      if(a.spent_on !== b.spent_on) return a.spent_on < b.spent_on ? 1 : -1;
+      return String(a.created_at) < String(b.created_at) ? 1 : -1;
+    });
+  }
+
+  /* ---------- 畫面 ---------- */
+  function renderStatus(){
+    const el = document.querySelector('[data-syncstatus]');
+    const n = pendingList.length;
+    let text = '';
+    if(cloudState === 'loading') text = '同步中…';
+    else if(cloudState === 'ok'){
+      const t = lastSyncAt ? `${pad2(lastSyncAt.getHours())}:${pad2(lastSyncAt.getMinutes())}` : '';
+      text = `已同步 ${t}`;
+    }
+    else if(cloudState === 'notable') text = '雲端資料表還沒建立，紀錄先存在這支手機';
+    else text = '目前離線，連上網路後會自動同步';
+    if(n > 0 && cloudState !== 'notable') text += `・${n} 筆待上傳`;
+    el.textContent = text;
+    el.classList.toggle('warn', cloudState === 'offline' || cloudState === 'notable');
+  }
+
+  function updateRateNote(){
+    const el = document.querySelector('[data-ratenote]');
+    el.textContent = latestRate ? `今日匯率　1 日圓 ≈ ${latestRate.toFixed(4)} 台幣` : '';
+  }
+
+  function entryMeta(e){
+    const parts = [];
+    if(e.payer) parts.push(esc(e.payer));
+    if(e.method) parts.push(esc(e.method));
+    if(e._pending) parts.push('待上傳');
+    return parts.join('・');
+  }
+  function twdSuffix(e){
+    if(e.currency !== 'JPY') return '';
+    const t = toTWD(e);
+    return t === null ? '' : `<div class="entry-twd">≈ ${fmtNT(t)}</div>`;
+  }
+
+  function renderEntries(){
+    const list = allEntries();
+    const container = document.querySelector('[data-expenseentries]');
+    if(list.length === 0){
+      container.innerHTML = '<p class="empty-hint">還沒有紀錄，新增第一筆吧</p>';
+      return;
+    }
+    let html = '', currentDay = null;
+    list.forEach(e=>{
+      if(e.spent_on !== currentDay){
+        currentDay = e.spent_on;
+        const dayTotal = list.filter(x => x.spent_on === currentDay).reduce((s, x) => s + (toTWD(x) || 0), 0);
+        html += `<div class="entry-day"><span>${dayLabel(currentDay)}</span><span>${fmtNT(dayTotal)}</span></div>`;
+      }
+      html += `
+      <div class="entry-item">
+        <div class="entry-main">
+          <div class="entry-cat">${esc(e.category)}</div>
+          ${e.note ? `<div class="entry-note">${esc(e.note)}</div>` : ''}
+          <div class="entry-time">${entryMeta(e)}</div>
+        </div>
+        <div class="entry-amount-col">
+          <div class="entry-amount">${fmtAmount(e.amount, e.currency)}</div>
+          ${twdSuffix(e)}
+        </div>
+        <button class="entry-del" data-delid="${esc(e.id)}" aria-label="刪除">✕</button>
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  document.querySelector('[data-expenseentries]').addEventListener('click', async (ev)=>{
+    const btn = ev.target.closest('[data-delid]');
+    if(!btn) return;
+    if(!confirm('確定刪除這筆紀錄？')) return;
+    const id = btn.dataset.delid;
+    btn.disabled = true;
+    if(pendingList.some(p => p.id === id)){
+      pendingList = pendingList.filter(p => p.id !== id);
+      lsSet(LS_PENDING, pendingList);
+      renderAll(true);
+      return;
+    }
+    try{
+      await deleteExpense(id);
+      expenseCache = expenseCache.filter(e => e.id !== id);
+      lsSet(LS_CACHE, expenseCache);
+      renderAll(true);
+      refreshExpenses();
+    }catch(e){
+      toast('刪除失敗，請檢查網路');
+      btn.disabled = false;
+    }
+  });
+
+  let overviewMode = 'cat';
+  let overviewOpenKey = null;
+
+  function renderOverview(){
+    const list = allEntries();
+    let jpyTotal = 0, twdTotal = 0, grand = 0, missing = 0;
+    list.forEach(e=>{
+      if(e.currency === 'JPY') jpyTotal += Number(e.amount); else twdTotal += Number(e.amount);
+      const t = toTWD(e);
+      if(t === null) missing++; else grand += t;
+    });
+    document.querySelector('[data-overview-grand]').textContent = fmtNT(grand);
+    document.querySelector('[data-overview-jpy]').textContent = fmtJPY(jpyTotal);
+    document.querySelector('[data-overview-twd]').textContent = fmtNT(twdTotal);
+    const hintEl = document.querySelector('[data-overview-grand-hint]');
+    if(list.length === 0) hintEl.textContent = '日幣依消費當天的匯率換算成台幣';
+    else if(missing > 0) hintEl.textContent = `有 ${missing} 筆日幣還沒抓到匯率，連上網路後會自動補上`;
+    else hintEl.textContent = `共 ${list.length} 筆・日幣依消費當天匯率換算`;
+
+    // 兩人各付多少
+    const payBox = document.querySelector('[data-overview-payers]');
+    payBox.innerHTML = PAYERS.map(p=>{
+      const sum = list.filter(e => e.payer === p).reduce((s, e) => s + (toTWD(e) || 0), 0);
+      return `<div class="overview-total-card"><div class="label">${esc(p)}付的</div><div class="value">${fmtNT(sum)}</div></div>`;
+    }).join('');
+
+    // 分組明細
+    let keys, keyOf, labelOf;
+    if(overviewMode === 'cat'){
+      const extra = Array.from(new Set(list.map(e => e.category))).filter(c => !CATS.includes(c));
+      keys = CATS.concat(extra);
+      keyOf = e => e.category; labelOf = k => k;
+    } else if(overviewMode === 'day'){
+      keys = Array.from(new Set(list.map(e => e.spent_on))).sort();
+      keyOf = e => e.spent_on; labelOf = k => dayLabel(k);
+    } else {
+      keys = Array.from(new Set(list.map(e => e.method || '未填')));
+      const rank = k => { const i = METHODS.indexOf(k); return i < 0 ? 99 : i; };
+      keys.sort((a,b)=> rank(a) - rank(b));
+      keyOf = e => e.method || '未填'; labelOf = k => k;
+    }
+    const breakdown = document.querySelector('[data-overview-breakdown]');
+    if(keys.length === 0){
+      breakdown.innerHTML = '<p class="empty-hint">還沒有紀錄</p>';
+      return;
+    }
+    breakdown.innerHTML = keys.map(k=>{
+      const entries = list.filter(e => keyOf(e) === k);
+      if(entries.length === 0){
+        return `<div class="cat-row"><div class="name">${esc(labelOf(k))}</div><div class="amounts">—</div></div>`;
+      }
+      const sum = entries.reduce((s, e) => s + (toTWD(e) || 0), 0);
+      const jpy = entries.filter(e => e.currency === 'JPY').reduce((s, e) => s + Number(e.amount), 0);
+      const sub = jpy ? `<span class="amounts-sub">${fmtJPY(jpy)}</span>` : '';
+      const itemsHtml = entries.map(e=>{
+        const head = overviewMode === 'cat' ? dayLabel(e.spent_on) : esc(e.category);
+        const noteText = e.note ? `・${esc(e.note)}` : '';
+        const t = toTWD(e);
+        const twd = (e.currency === 'JPY' && t !== null) ? `<span class="ci-twd">≈ ${fmtNT(t)}</span>` : '';
+        return `<div class="cat-item"><span class="ci-note">${head}${noteText}</span><span class="ci-amount">${fmtAmount(e.amount, e.currency)}${twd}</span></div>`;
+      }).join('');
+      const open = overviewOpenKey === `${overviewMode}:${k}`;
+      return `<div class="cat-block${open ? ' open' : ''}" data-catblock data-key="${esc(overviewMode + ':' + k)}">
+        <div class="cat-head" data-cattoggle>
+          <div class="name">${esc(labelOf(k))}</div>
+          <div class="cat-head-right"><span class="amounts">${sub}${fmtNT(sum)}</span><span class="cat-chevron"></span></div>
+        </div>
+        <div class="cat-items" data-catitems${open ? ' style="max-height:none"' : ''}>${itemsHtml}</div>
+      </div>`;
+    }).join('');
+  }
+
+  document.querySelector('[data-overview-breakdown]').addEventListener('click', (e)=>{
+    const head = e.target.closest('[data-cattoggle]');
+    if(!head) return;
+    const block = head.closest('[data-catblock]');
+    const items = block.querySelector('[data-catitems]');
+    const isOpen = block.classList.contains('open');
+
+    document.querySelectorAll('[data-catblock].open').forEach(other=>{
+      if(other === block) return;
+      const oi = other.querySelector('[data-catitems]');
+      oi.style.maxHeight = oi.scrollHeight + 'px';
+      requestAnimationFrame(()=>{ oi.style.maxHeight = '0px'; });
+      other.classList.remove('open');
+    });
+
+    if(isOpen){
+      items.style.maxHeight = items.scrollHeight + 'px';
+      requestAnimationFrame(()=>{ items.style.maxHeight = '0px'; });
+      block.classList.remove('open');
+      overviewOpenKey = null;
+    } else {
+      block.classList.add('open');
+      items.style.maxHeight = items.scrollHeight + 'px';
+      overviewOpenKey = block.dataset.key;
+    }
+  });
+
+  document.querySelectorAll('[data-overviewmode]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      overviewMode = btn.dataset.overviewmode;
+      overviewOpenKey = null;
+      document.querySelectorAll('[data-overviewmode]').forEach(b=>b.classList.toggle('active', b === btn));
+      renderOverview();
+    });
+  });
+
+  function renderAll(force){
+    renderStatus();
+    const key = JSON.stringify([expenseCache, pendingList, latestRate]);
+    if(!force && key === lastRenderKey) return;
+    lastRenderKey = key;
+    renderEntries();
+    renderOverview();
+  }
+
+  /* ---------- 表單 ---------- */
+  let selectedCat = null;
+  let selectedCurrency = 'JPY';
+  let selectedPayer = PAYERS.includes(prefs.payer) ? prefs.payer : null;
+  let selectedMethod = METHODS.includes(prefs.method) ? prefs.method : '現金';
+
+  function bindChips(rootSel, attr, getVal, setVal){
+    const chips = document.querySelectorAll(`${rootSel} .chip`);
+    const paint = ()=> chips.forEach(c => c.classList.toggle('active', c.dataset[attr] === getVal()));
+    chips.forEach(chip=>{
+      chip.addEventListener('click', ()=>{ setVal(chip.dataset[attr]); paint(); });
+    });
+    paint();
+  }
+  bindChips('[data-expensecats]', 'cat', ()=>selectedCat, v=>{ selectedCat = v; });
+  bindChips('[data-expensepayers]', 'payer', ()=>selectedPayer, v=>{ selectedPayer = v; prefs.payer = v; lsSet(LS_PREFS, prefs); });
+  bindChips('[data-expensemethods]', 'method', ()=>selectedMethod, v=>{ selectedMethod = v; prefs.method = v; lsSet(LS_PREFS, prefs); });
+
+  const amountInput = document.querySelector('[data-expenseamount]');
+  const noteInput = document.querySelector('[data-expensenote]');
+  const dateInput = document.querySelector('[data-expensedate]');
+  dateInput.value = todayStr();
+
+  function parseAmount(){
+    const v = parseFloat(String(amountInput.value).replace(/[,，\s]/g,''));
+    return isFinite(v) ? v : 0;
+  }
+  function updatePreview(){
+    const el = document.querySelector('[data-amountpreview]');
+    const amount = parseAmount();
+    if(selectedCurrency === 'JPY' && amount > 0 && latestRate){
+      el.textContent = `約 ${fmtNT(amount * latestRate)}`;
+    } else {
+      el.textContent = '';
+    }
+  }
+  amountInput.addEventListener('input', updatePreview);
+
+  document.querySelectorAll('[data-expensecurrency] button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-expensecurrency] button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCurrency = btn.dataset.currency;
+      updatePreview();
+    });
+  });
+
+  document.querySelector('[data-expenseadd]').addEventListener('click', async ()=>{
+    const addBtn = document.querySelector('[data-expenseadd]');
+    const amount = parseAmount();
+    const spentOn = dateInput.value || todayStr();
+
+    if(!selectedPayer){ toast('請選擇誰付的'); return; }
+    if(!selectedCat){ toast('請選擇分類'); return; }
+    if(!amount || amount <= 0){ toast('請輸入金額'); return; }
+
+    addBtn.disabled = true;
+    addBtn.textContent = '儲存中…';
+
+    const entry = {
+      id: uuid(),
+      created_at: new Date().toISOString(),
+      spent_on: spentOn,
+      category: selectedCat,
+      amount: amount,
+      currency: selectedCurrency,
+      note: noteInput.value.trim(),
+      rate_to_twd: null,
+      payer: selectedPayer,
+      method: selectedMethod
+    };
+    // 先存在手機，再上傳；沒網路也不會掉資料
+    pendingList.unshift(entry);
+    lsSet(LS_PENDING, pendingList);
+    amountInput.value = '';
+    noteInput.value = '';
+    dateInput.value = todayStr();
+    updatePreview();
+    renderAll(true);
+
+    await refreshExpenses();
+    const stillPending = pendingList.some(p => p.id === entry.id);
+    toast(stillPending ? '已先存在這支手機，連線後自動上傳' : '已新增');
+    addBtn.disabled = false;
+    addBtn.textContent = '新增紀錄';
+  });
+
+  document.querySelectorAll('[data-expensesub]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const sub = btn.dataset.expensesub;
+      document.querySelectorAll('[data-expensesub]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.expense-page').forEach(p=>{
+        p.classList.toggle('active', p.dataset.expensepage === sub);
+      });
+      refreshExpenses();
+    });
+  });
+
+  /* ---------- 自動同步：回到畫面、連上網路、每 20 秒 ---------- */
+  function expenseTabVisible(){
+    const page = document.querySelector('[data-tabpage="expense"]');
+    return !page.hidden && document.visibilityState === 'visible';
+  }
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') refreshExpenses(); });
+  window.addEventListener('online', refreshExpenses);
+  setInterval(()=>{ if(expenseTabVisible()) refreshExpenses(); }, 20000);
+
+  renderAll(true);
+  loadLatestRate();
+  refreshExpenses();
+
+</script>
+
+</body>
+</html>
